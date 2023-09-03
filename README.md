@@ -17,11 +17,11 @@ The project is simple in structure and easy to understand, making it an excellen
 None
 
 ## Requirements
-python        ==3.7.9<br />
-numpy         ==1.21.5<br />
-opencv-python ==4.8.0<br />
-box2d         ==2.3.10<br />
-gym           ==0.25.1<br />
+python &emsp;&emsp;&emsp;&emsp;== 3.7.9<br />
+numpy &emsp;&emsp;&emsp;&emsp;== 1.21.5<br />
+opencv-python &nbsp;== 4.8.0<br />
+box2d &emsp;&emsp;&emsp;&emsp;&nbsp;== 2.3.10<br />
+gym &emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;== 0.25.1<br />
 
 
 ## Changelog
