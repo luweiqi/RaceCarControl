@@ -34,6 +34,7 @@ if __name__ == '__main__':
 
         control_module.feed_back(velocity, ref_line)
         control_module.control_task("MPC")
+        # control_module.control_task("PID")
         action = control_module.action
 
         env.render()
