@@ -17,8 +17,9 @@ The project is simple in structure and easy to understand, making it an excellen
 None
 
 ## Requirements
-Python-3.7
 
+|Python               |3.7       |
+| -----------         | -------- |
 |gym                  |0.25.1    |
 |opencv-python        |4.8.0.76  |
 |numpy                |1.21.5    |
