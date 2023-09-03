@@ -7,11 +7,11 @@ from gym import wrappers
 import vision
 import control
 
-env = gym.make('CarRacing-v2', render_mode='human')  # , render_mode='human'
+env = gym.make('CarRacing-v2', render_mode='human')
 env = wrappers.RecordVideo(env, video_folder='./videos/', name_prefix='pid_video', video_length=6000)
 
 vision_module = vision.BEV_Vision(debug=False)
-control_module = control.Car_Controller(debug=True)
+control_module = control.Car_Controller(debug=False)
 
 
 def skip_frame(skip_num):
@@ -21,7 +21,7 @@ def skip_frame(skip_num):
 
 if __name__ == '__main__':
     env.reset()
-    action = (0.0, 0.2, 0)
+    action = (0.0, 0.0, 0.0)
 
     skip_frame(50)
 
@@ -33,16 +33,8 @@ if __name__ == '__main__':
         velocity, ref_line = vision_module.vision_task(raw_img)
 
         control_module.feed_back(velocity, ref_line)
-
-        # if use p controller:
-        # control_module.velocity_controller(0.8)
-        # control_module.direction_controller()
-
-        # if use MPC controller
-        control_module.MPC_solve()
-
-        env.render()
-
+        control_module.control_task("MPC")
         action = control_module.action
 
+        env.render()
         cv2.waitKey(1)

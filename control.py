@@ -90,6 +90,11 @@ class Car_Controller:
         return predict_x, predict_y
 
     def debug_forward(self, cmd_list):
+        """
+        Show the reference line and route points
+        :param cmd_list:
+        :return:
+        """
         start_x = 65
         start_y = 48
         start_yaw = 0
@@ -114,7 +119,7 @@ class Car_Controller:
         img.fill(0)
 
         for x, y in zip(predict_x, predict_y):
-            img[int(x)][int(y)] = 255
+            cv2.circle(img, (int(y), int(x)), 2, (255, 255, 255), thickness=-1)
         for ref_p in self.ref_line:
             img[ref_p[0]][ref_p[1]] = 180
 
@@ -128,15 +133,14 @@ class Car_Controller:
         ref_error = 0
         sum_s = 0
         sum_centripetal_acc = 0
-        sum_av = 0
+        sum_acc = 0
         sum_df = 0
 
         for i in range(int(len(cmd_list) / 2) - 1):
-            sum_av += abs(cmd_list[2 * i] - cmd_list[2 * i + 2])
+            sum_acc += abs(cmd_list[2 * i] - cmd_list[2 * i + 2])
             sum_df += abs(cmd_list[2 * i + 1] - cmd_list[2 * i + 3])
 
         last_x, last_y = 65, 48
-        # print("******** start ********")
         for i, [x, y] in enumerate(zip(pre_x, pre_y)):
             distance, _ = self.ref_kd_tree.query([x, y], k=1)
             ref_error += distance
@@ -144,10 +148,10 @@ class Car_Controller:
             sum_centripetal_acc += cmd_list[2 * i] * math.tan(cmd_list[2 * i + 1])
             last_x, last_y = x, y
 
-        # print(sum_ar)
-        return 1 * ref_error - 1 * sum_s + 0.01 * sum_centripetal_acc + 300 * sum_av + 10 * sum_df
+        return 1 * ref_error - 1 * sum_s + 0.01 * sum_centripetal_acc + 300 * sum_acc + 10 * sum_df
 
     def MPC_solve(self):
+        # scipy.optimize.minimize can only optimize one-dimensional vectors
         init_cmd = [2.0, 0.0]
         cmd_bound = [(0.5, 5), (-math.pi / 4, math.pi / 4)]
         cmd_0 = np.array([init_cmd[i % 2] for i in range(2 * self.forward_step)])
@@ -161,3 +165,10 @@ class Car_Controller:
             self.debug_forward(test.x)
         self.velocity_controller(test.x[0])
         self.action[0] = test.x[1] / (math.pi / 4)
+
+    def control_task(self, controller):
+        if controller == "PID":
+            self.velocity_controller(0.8)
+            self.direction_controller()
+        elif controller == "MPC":
+            self.MPC_solve()
