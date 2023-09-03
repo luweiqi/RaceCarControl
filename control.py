@@ -19,8 +19,6 @@ class Car_Controller:
         # MPC parameter
         self.forward_step = 4
 
-        self.last_cmd = [0.0, 0.0]
-
     def feed_back(self, velocity, ref_line):
         self.velocity = velocity
         self.ref_line = ref_line
@@ -31,7 +29,6 @@ class Car_Controller:
         if self.debug:
             print("******** velocity ********")
             print(self.velocity)
-            print(math.sqrt(self.velocity[0] ** 2 + self.velocity[1] ** 2))
             print("                          ")
 
     def velocity_controller(self, ref_v):
@@ -128,9 +125,9 @@ class Car_Controller:
         # cmd_list = [v0, s0, v1, s1, ......]
         pre_x, pre_y = self.MPC_forward(cmd_list)
 
-        error = 0
+        ref_error = 0
         sum_s = 0
-        sum_ar = 0
+        sum_centripetal_acc = 0
         sum_av = 0
         sum_df = 0
 
@@ -142,13 +139,13 @@ class Car_Controller:
         # print("******** start ********")
         for i, [x, y] in enumerate(zip(pre_x, pre_y)):
             distance, _ = self.ref_kd_tree.query([x, y], k=1)
-            error += distance
+            ref_error += distance
             sum_s += math.sqrt((x - last_x) ** 2 + (y - last_y) ** 2)
-            sum_ar += cmd_list[2 * i] * math.tan(cmd_list[2 * i + 1])
+            sum_centripetal_acc += cmd_list[2 * i] * math.tan(cmd_list[2 * i + 1])
             last_x, last_y = x, y
 
         # print(sum_ar)
-        return 1 * error - 1 * sum_s + 0.01 * sum_ar + 300 * sum_av + 10 * sum_df
+        return 1 * ref_error - 1 * sum_s + 0.01 * sum_centripetal_acc + 300 * sum_av + 10 * sum_df
 
     def MPC_solve(self):
         init_cmd = [2.0, 0.0]
@@ -164,4 +161,3 @@ class Car_Controller:
             self.debug_forward(test.x)
         self.velocity_controller(test.x[0])
         self.action[0] = test.x[1] / (math.pi / 4)
-        self.last_cmd = [test.x[0], test.x[1]]
