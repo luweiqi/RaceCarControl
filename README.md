@@ -38,3 +38,4 @@ Mail: 1805744767@qq.com
 ShowerSong
 
 ## License
+GNU General Public License v3.0
